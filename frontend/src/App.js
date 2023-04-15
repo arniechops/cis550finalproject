@@ -1,4 +1,5 @@
 import {useEffect} from 'react'
+import Login from './pages/Login';
 
 function App() {
     useEffect(() => {
@@ -9,10 +10,7 @@ function App() {
   }, [])
   
   return (
-    <div className="text-3xl">
-      Flights and Hotels
-      
-    </div>
+    <Login/>
   );
 }
 
