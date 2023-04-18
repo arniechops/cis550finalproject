@@ -1,16 +1,17 @@
-import {useEffect} from 'react'
-import Login from './pages/Login';
+import { Route, Routes } from "react-router-dom"
+import Home from "./pages/Home";
+import Login from "./pages/Login";
 
 function App() {
-    useEffect(() => {
-      fetch('/login')
-        .then(response => response.json())
-        .then(data => console.log(data))
-        .catch(error => console.error(error));
-  }, [])
-  
   return (
-    <Login/>
+    <Routes>
+      <Route path="/" element={
+        <Login/>
+      }></Route>
+      <Route path="/home" element={
+        <Home/>
+      }></Route>
+    </Routes>
   );
 }
 
