@@ -9,5 +9,6 @@ app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
 
-app.get('/login', routes.login)
+app.get('/getflights', routes.getFlights)
+app.get('/getallflights', routes.getAllFlights)
 

@@ -8,16 +8,24 @@ import Sidebar from '../sections/Sidebar';
 
 export default function Home() {
 
+    const [menuItem, setMenuItem] = useState(1)
+
+    const handleMenuItemChange = (val) => {
+        setMenuItem(val)
+    }
+
   return (
     <Box>
         <Flex w="full" align={"center"} justify="center" mt={10}>
             <Grid templateColumns='1fr 4fr' h="auto" rounded={'md'}
-            w={'70%'} minW={"500px"} border={"2px"} borderColor={"gray.200"}>
+            w={'70%'} minW={"500px"} shadow='sm'>
                 <GridItem w="100%">
-                    <Sidebar/>
+                    <Sidebar handleMenuItemChange={handleMenuItemChange} menuItem={menuItem}/>
                 </GridItem>
                 <GridItem w="100%">
-                    <FlightSearch/>
+                    {
+                        menuItem === 1 ? <FlightSearch/> : <CitySearch/> 
+                    }
                 </GridItem>
             </Grid>
         </Flex>

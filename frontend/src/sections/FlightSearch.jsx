@@ -1,7 +1,8 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { AddIcon, ArrowForwardIcon, CloseIcon, PlusSquareIcon } from '@chakra-ui/icons'
 import { Avatar, Box, Button, Card, Flex, HStack, Input, Text, VStack } from '@chakra-ui/react'
 import DropdownInput from '../components/DropdownInput';
+import useGet from '../hooks/useGet';
 
 export default function FlightSearch() {
 
@@ -21,7 +22,7 @@ export default function FlightSearch() {
                         <Box align="center" justify="center">
                             <ArrowForwardIcon w="6" h="6" />
                         </Box>
-                        <DropdownInput placeholder={"Final"}/>
+                        <DropdownInput placeholder={"Final"} route={'/getallflights'}/>
                     </>
                 )
             }

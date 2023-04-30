@@ -1,9 +1,17 @@
-var login = function (req, res) {
-    res.json("This is the login route.");
+const vals = ["USA", "India", "Canada"]
+
+var getFlights = function (req, res) {
+    const val = req.query.string;
+    res.json(vals.filter(str => str.indexOf(val) !== -1))
+}
+
+var getAllFlights = function (req, res) {
+    res.json(vals)
 }
 
 var routes = {
-    login
+    getFlights,
+    getAllFlights
 };
 
 module.exports = routes;
