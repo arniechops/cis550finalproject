@@ -1,18 +1,16 @@
 import {useState, useEffect} from 'react';
 
-const useGet = (url, set) => {
+const useGet = (url) => {
     const [loading, setLoading] = useState(true)
+    const [response, setResponse] = useState()
+    fetch(url)
+        .then(res => res.json())
+        .then(data => {
+            setLoading(false)
+            setResponse(data)
+        })
+        return {response, loading}
+    }
 
-    useEffect(() => {
-        fetch(url)
-            .then(res => res.json())
-            .then(data => {
-                setLoading(false)
-                set(data)
-            })
-    })
-
-    return {loading}
-}
 
 export default useGet;

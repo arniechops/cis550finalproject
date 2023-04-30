@@ -3,14 +3,18 @@ import { Box, Button, HStack, Input, InputGroup, InputRightElement, VStack } fro
 import React, { useEffect, useRef, useState } from 'react'
 import useGet from '../hooks/useGet'
 
-export default function DropdownInput({placeholder, width=200, route='/getallflights'}) {
+export default function DropdownInput({placeholder, width=200, route='/getallflights', setter}) {
 
     const [focus, setFocus] = useState(false)
     const [text, setText] = useState("")
     const inputRef = useRef()
-    const [options, setOptions] = useState(["Option 1", "Option 2"])
+    const [options, setOptions] = useState()
     
-    const {result, loading} = useGet(route, setOptions);
+    useEffect(() => {
+        fetch(route)
+            .then(res => res.json())
+            .then(data => setOptions(data))
+    }, [])
 
     function handleChange (e) {
         setText(e.target.value)
@@ -40,6 +44,7 @@ export default function DropdownInput({placeholder, width=200, route='/getallfli
                             p={2}
                             _hover={{bg: 'gray.50', cursor: 'pointer'}}
                             onClick={() => {
+                                setter(elt)
                                 setText(elt)
                                 setFocus(false)
                             }}
