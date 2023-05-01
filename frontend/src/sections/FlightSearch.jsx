@@ -1,17 +1,17 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { AddIcon, ArrowForwardIcon, CloseIcon, PlusSquareIcon } from '@chakra-ui/icons'
-import { Avatar, Box, Button, Card, Flex, HStack, Input, Text, VStack } from '@chakra-ui/react'
+import { Avatar, Box, Button, Card, Checkbox, Flex, HStack, IconButton, Input, Text, VStack } from '@chakra-ui/react'
 import DropdownInputFlights from '../components/DropdownInputFlights';
 import useGet from '../hooks/useGet';
 import { FlightsContext } from '../pages/Home';
+import DropdownInput from '../components/DropdownInput';
 
-export default function FlightSearch() {
+export default function FlightSearch({setResults}) {
 
     const [extraStop, setExtraStop] = useState(false);
     const [from, setFrom] = useState("");
     const [to, setTo] = useState("");
     const [final, setFinal] = useState("");
-    const {setFlightResults} = useContext(FlightsContext);
 
     function handleSubmit() {
         if (!from || !to || (extraStop && !final)) {
@@ -36,7 +36,7 @@ export default function FlightSearch() {
         fetch(`${url}?${queryString}`)
             .then(response => response.json())
             .then(data => {
-                setFlightResults(data)
+                setResults(data)
             })
             .catch(error => {
                 console.error(error);
@@ -61,12 +61,11 @@ export default function FlightSearch() {
                     </>
                 )
             }
-            <Button rounded={"full"} colorScheme={extraStop ? "red" : "gray"} onClick={() => setExtraStop(!extraStop)}>
-                {
-                    extraStop ? <CloseIcon/> : <AddIcon/>
-                }
-            </Button>
+            <IconButton size="sm" rounded={"full"} colorScheme={extraStop ? "red" : "gray"}
+            icon={extraStop ? <CloseIcon/> : <AddIcon/>}
+            onClick={() => setExtraStop(!extraStop)}/>
         </HStack>
+        <Checkbox>Flights with hotels nearby</Checkbox>
         <Flex w="full" justify={"center"}>
             <Button colorScheme="teal" onClick={handleSubmit}>Search for flights!</Button>
         </Flex>
