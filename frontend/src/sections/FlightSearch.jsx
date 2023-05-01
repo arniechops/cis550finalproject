@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { AddIcon, ArrowForwardIcon, CloseIcon, PlusSquareIcon } from '@chakra-ui/icons'
 import { Avatar, Box, Button, Card, Flex, HStack, Input, Text, VStack } from '@chakra-ui/react'
 import DropdownInput from '../components/DropdownInput';
 import useGet from '../hooks/useGet';
+import { FlightsContext } from '../pages/Home';
 
 export default function FlightSearch() {
 
@@ -11,15 +12,21 @@ export default function FlightSearch() {
     const [to, setTo] = useState("");
     const [final, setFinal] = useState("");
 
+    const {setFlightResults} = useContext(FlightsContext);
+
     function handleSubmit() {
         if (!from || !to || (extraStop && !final)) {
             alert("Not all fields have been filled")
             return
         }
-        const url = '/searchflights';
+        if (from === to || final === to) {
+            alert("Two of the stops are the same")
+            return
+        }
+        const url = '/gettrip';
         const params = {
-            to: to,
             from: from,
+            to: to,
             final: final
         };
 
@@ -30,7 +37,7 @@ export default function FlightSearch() {
         fetch(`${url}?${queryString}`)
             .then(response => response.json())
             .then(data => {
-                console.log(data);
+                setFlightResults(data)
             })
             .catch(error => {
                 console.error(error);

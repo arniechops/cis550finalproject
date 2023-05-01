@@ -1,0 +1,9 @@
+{
+    "rds_host": "hotelsandflights.czmwcig5ogux.us-east-1.rds.amazonaws.com",
+    "rds_port": "3306",
+    "rds_user": "admin",
+    "rds_password" : "Database12345",
+    "rds_db": "FinalProject",
+    "server_host": "localhost",
+    "server_port":"8000"
+  }
