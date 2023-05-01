@@ -1,7 +1,6 @@
 import { AddIcon, ArrowForwardIcon, CloseIcon, HamburgerIcon, PlusSquareIcon } from '@chakra-ui/icons'
 import { Avatar, Box, Button, Card, Flex, Grid, GridItem, HStack, Input, Spacer, Text, VStack } from '@chakra-ui/react'
 import React, { createContext, useState } from 'react'
-import DropdownInput from '../components/DropdownInput';
 import CitySearch from '../sections/CitySearch';
 import FlightSearch from '../sections/FlightSearch';
 import Sidebar from '../sections/Sidebar';

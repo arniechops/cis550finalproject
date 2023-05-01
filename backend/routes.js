@@ -20,9 +20,9 @@ connection.connect((err) => err && console.log(err));
 var getFlights = function (req, res) {
     const val = req.query.string;
     connection.query(`
-    SELECT DISTINCT city, name, id
+    SELECT DISTINCT id, iata, CONCAT(Airports.city, ', ', Airports.name) AS full
     FROM Airports 
-    WHERE name LIKE '${val}%'
+    WHERE name LIKE '${val}%' OR iata LIKE '${val}%' OR city LIKE '${val}%' 
     LIMIT 10
     `, (err, data) => {
       if (err) {
