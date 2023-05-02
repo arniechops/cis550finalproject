@@ -21,3 +21,5 @@ app.get('/findbusiestairports', routes.findBusiestAirports);
 app.get('/findbusiestairlines', routes.findBusiestAirlines);
 app.get('/flightswiththreestops', routes.flightsWithThreeStops);
 app.get('/findhotelsbysearch', routes.findHotelBySearch);
+app.get('/findclosesthotel', routes.findClosestHotel);
+app.get('/findattractions', routes.findAttractions);

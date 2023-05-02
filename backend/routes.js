@@ -31,10 +31,6 @@ var getFlights = function (req, res) {
     });
 }
 
-var getAllFlights = function (req, res) {
-    res.json(vals)
-}
-
 var findHotelBySearch = function (req, res) {
   //const country = req.query.country;
   connection.query(`
@@ -201,6 +197,7 @@ var findHotelsWithIncomingFlights = function (req, res) {
     WHERE A.source_id <> B.target_id AND ASrc.city = '${req.query.midCity}' AND BTgt.city = '${req.query.toCity}'))
     SELECT startTrips.num_stops AS firstNumStops, startTrips.source_name AS first, startTrips.stop1_name AS second, startTrips.airline1 AS firstAirline, startTrips.airline2 as secondAirline, secondTrips.source_name AS third, secondTrips.num_stops AS secondNumStops, secondTrips.stop1_name AS fourth, secondTrips.airline1 AS thirdAirline, secondTrips.airline2 AS fourthAirline, secondTrips.target_name AS fifth
     FROM startTrips JOIN secondTrips ON startTrips.target_name = secondTrips.source_name
+    ORDER BY firstNumStops ASC, secondNumStops ASC
     LIMIT 50;
     `, (err, data) => {
       if (err) {
@@ -287,6 +284,46 @@ var findHotelsWithIncomingFlights = function (req, res) {
     WHERE a.name = '${req.query.airport}'
     ORDER BY distance;
 
+
+    `, (err, data) => {
+      if (err) {
+        console.log(err);
+      } else if (data) {
+        res.json(data);
+      }
+    });
+  }
+
+  var findClosestHotel = function (req, res) {
+    //takes in an airport (req.query.airport) and finds top X (req.query.limit) nearby hotels, ordered by distance 
+    connection.query(`
+    SELECT h.title, h.description, h.article, h.url,
+    (6371 * ACOS(COS(RADIANS(a.lat)) * COS(RADIANS(h.latitude)) * COS(RADIANS(a.lon) - RADIANS(h.longitude)) + SIN(RADIANS(a.lat)) * SIN(RADIANS(h.latitude)))) AS distance
+    FROM Airports a
+    INNER JOIN hotels h ON (6371 * ACOS(COS(RADIANS(a.lat)) * COS(RADIANS(h.latitude)) * COS(RADIANS(a.lon) - RADIANS(h.longitude)) + SIN(RADIANS(a.lat)) * SIN(RADIANS(h.latitude)))) < 10
+    WHERE a.name = '${req.query.airport}' AND h.type LIKE 'sleep'
+    ORDER BY distance
+    LIMIT 1;
+
+    `, (err, data) => {
+      if (err) {
+        console.log(err);
+      } else if (data) {
+        res.json(data);
+      }
+    });
+  }
+
+  var findAttractions = function (req, res) {
+    //takes in an airport (req.query.airport) and finds top X (req.query.limit) nearby hotels, ordered by distance 
+    connection.query(`
+    SELECT h.title, h.description, h.article, h.url, h.type,
+    (6371 * ACOS(COS(RADIANS(a.lat)) * COS(RADIANS(h.latitude)) * COS(RADIANS(a.lon) - RADIANS(h.longitude)) + SIN(RADIANS(a.lat)) * SIN(RADIANS(h.latitude)))) AS distance
+    FROM Airports a
+    INNER JOIN hotels h ON (6371 * ACOS(COS(RADIANS(a.lat)) * COS(RADIANS(h.latitude)) * COS(RADIANS(a.lon) - RADIANS(h.longitude)) + SIN(RADIANS(a.lat)) * SIN(RADIANS(h.latitude)))) < 10
+    WHERE a.name = '${req.query.airport}' AND h.type NOT LIKE 'sleep'
+    ORDER BY distance
+    LIMIT 5;
 
     `, (err, data) => {
       if (err) {
@@ -428,7 +465,9 @@ var routes = {
     findBusiestAirports, 
     findBusiestAirlines, 
     flightsWithThreeStops,
-    findHotelBySearch
+    findHotelBySearch,
+    findClosestHotel,
+    findAttractions
 };
 
 module.exports = routes;
