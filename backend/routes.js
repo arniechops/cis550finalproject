@@ -67,22 +67,7 @@ var findHotelBySearch = function (req, res) {
 var findHotelsWithIncomingFlights = function (req, res) {
     //const country = req.query.country;
     connection.query(`
-    CREATE VIEW airport_flights AS
-    (SELECT a.id, COUNT(DISTINCT r.source_id) AS num_incoming_flights
-    FROM Airports a
-    INNER JOIN Routes r ON a.id = r.target_id
-    GROUP BY a.id)
-
-    SELECT h.title, h.address, h.latitude, h.longitude
-    FROM (
-    SELECT h.id, (6371 * acos(cos(radians(h.latitude)) * cos(radians(a.lat)) * cos(radians(a.lon) - radians(h.longitude)) + sin(radians(h.latitude)) * sin(radians(a.lat)))) AS distance
-    FROM hotels h
-    INNER JOIN Airports a ON a.country = 'United States' AND a.country <> 'United States'
-    ) h2
-    INNER JOIN airport_flights af ON af.id = h2.id AND af.num_incoming_flights >= 10
-    INNER JOIN hotels h ON h.id = h2.id
-    WHERE h2.distance <= 10
-    ORDER BY h2.distance ASC;
+    
 
     `, (err, data) => {
       if (err) {
@@ -145,9 +130,8 @@ var findHotelsWithIncomingFlights = function (req, res) {
           ATgt.name AS target_name,
           NULL AS stop1_name,
           NULL AS stop2_name,
-          NULL AS airline1,
+          X.name AS airline1,
           NULL AS airline2,
-          NULL AS airline3,
           'First Trip' AS TripStatus
       FROM possible A
       JOIN Airports ASrc ON A.source_id = ASrc.id 
@@ -168,7 +152,6 @@ var findHotelsWithIncomingFlights = function (req, res) {
           NULL AS stop2_name,
           Airline1.name AS airline1,
           Airline2.name AS airline2,
-          NULL AS airline3,
           'First Trip' AS TripStatus
       FROM possible A
       JOIN possible B ON A.target_id = B.source_id
@@ -192,7 +175,6 @@ var findHotelsWithIncomingFlights = function (req, res) {
           NULL AS stop2_name,
           NULL AS airline1,
           NULL AS airline2,
-          NULL AS airline3,
           'Second Trip' AS TripStatus
       FROM possible A
       JOIN Airports ASrc ON A.source_id = ASrc.id 
@@ -213,7 +195,6 @@ var findHotelsWithIncomingFlights = function (req, res) {
           NULL AS stop2_name,
           Airline1.name AS airline1,
           Airline2.name AS airline2,
-          NULL AS airline3,
           'Second Trip' AS TripStatus
       FROM possible A
       JOIN possible B ON A.target_id = B.source_id
@@ -232,7 +213,6 @@ var findHotelsWithIncomingFlights = function (req, res) {
       stop2_name,
       airline1, 
       airline2,
-      airline3,
       target_name,
       TripStatus
     FROM routes
