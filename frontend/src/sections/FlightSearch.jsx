@@ -6,7 +6,7 @@ import useGet from '../hooks/useGet';
 import { FlightsContext } from '../pages/Home';
 import DropdownInput from '../components/DropdownInput';
 
-export default function FlightSearch({setResults}) {
+export default function FlightSearch({setResults1, setResults2}) {
 
     const [extraStop, setExtraStop] = useState(false);
     const [from, setFrom] = useState("");
@@ -36,7 +36,26 @@ export default function FlightSearch({setResults}) {
         fetch(`${url}?${queryString}`)
             .then(response => response.json())
             .then(data => {
-                setResults(data)
+                setResults1(data)
+            })
+            .catch(error => {
+                console.error(error);
+            });
+        
+        const params2 = {
+            from: to,
+            to: from,
+            final: final
+        };
+
+        const queryString2 = Object.keys(params)
+            .map(key => `${encodeURIComponent(key)}=${encodeURIComponent(params[key])}`)
+            .join('&');
+
+        fetch(`${url}?${queryString2}`)
+            .then(response => response.json())
+            .then(data => {
+                setResults2(data)
             })
             .catch(error => {
                 console.error(error);

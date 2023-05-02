@@ -1,6 +1,7 @@
 import { HamburgerIcon } from '@chakra-ui/icons'
 import { Avatar, Box, Button, Card, Flex, Grid, GridItem, Heading, HStack, Input, Spacer, Tab, TabList, TabPanel, TabPanels, Tabs, Text, VStack } from '@chakra-ui/react'
 import React, { createContext, useState } from 'react'
+import AirlinesSearch from '../sections/AirlinesSearch';
 import CityResults from '../sections/CityResults';
 import CitySearch from '../sections/CitySearch';
 import FlightResults from '../sections/FlightResults';
@@ -15,6 +16,7 @@ export default function Home() {
     const [flightResults, setFlightResults] = useState([]);
     const [hotelResults, setHotelResults] = useState([]);
     const [itineraryFlightResults, setItineraryFlightResults] = useState([])
+    const [airlinesResults, setAirlinesResults] = useState([])
 
   return (
     <Box>
@@ -49,7 +51,7 @@ export default function Home() {
                 <ItineraryPlannerResults results={itineraryFlightResults}/>
             </TabPanel>
             <TabPanel>
-                
+                <AirlinesSearch setResults={setAirlinesResults}/>
             </TabPanel>
         </TabPanels>
         </Tabs>
