@@ -116,105 +116,92 @@ var findHotelsWithIncomingFlights = function (req, res) {
     //takes in a country and returns all names and ids of flight routes and the number of stops (0, 1)
     connection.query(`
     WITH possible AS (
-        SELECT source_id, target_id, airline_id FROM Routes
-        WHERE source_id IN (SELECT id FROM Airports) AND target_id IN (SELECT id FROM Airports)
-    ),
-    routes AS (
-      (SELECT DISTINCT
-          0 AS num_stops,
-          A.source_id AS source_id,
-          ASrc.name AS source_name,
-          A.target_id AS target_id,
-          ATgt.name AS target_name,
-          NULL AS stop1_name,
-          NULL AS stop2_name,
-          X.name AS airline1,
-          NULL AS airline2,
-          'First Trip' AS TripStatus
-      FROM possible A
-      JOIN Airports ASrc ON A.source_id = ASrc.id 
-      JOIN Airports ATgt ON A.target_id = ATgt.id
-      JOIN Airlines X ON X.id = A.airline_id
-      WHERE ASrc.city = '${req.query.fromCity}' AND ATgt.city = '${req.query.midCity}'
-      LIMIT 10)
+      SELECT source_id, target_id, airline_id FROM Routes
+      WHERE source_id IN (SELECT id FROM Airports) AND target_id IN (SELECT id FROM Airports)
+),
+  startTrips AS (
+    (SELECT DISTINCT
+        0 AS num_stops,
+        A.source_id AS source_id,
+        ASrc.name AS source_name,
+        A.target_id AS target_id,
+        ATgt.name AS target_name,
+        NULL AS stop1_name,
+        NULL AS stop2_name,
+        X.name AS airline1,
+        NULL AS airline2,
+        'First Trip' AS TripStatus
+    FROM possible A
+    JOIN Airports ASrc ON A.source_id = ASrc.id
+    JOIN Airports ATgt ON A.target_id = ATgt.id
+    JOIN Airlines X ON X.id = A.airline_id
+    WHERE ASrc.city = '${req.query.fromCity}' AND ATgt.city = '${req.query.midCity}'
 
-      UNION ALL
-  
-      (SELECT DISTINCT
-          1 AS num_stops,
-          A.source_id AS source_id,
-          ASrc.name AS source_name,
-          B.target_id AS target_id,
-          BTgt.name AS target_name,
-          ABtgt.name AS stop1_name,
-          NULL AS stop2_name,
-          Airline1.name AS airline1,
-          Airline2.name AS airline2,
-          'First Trip' AS TripStatus
-      FROM possible A
-      JOIN possible B ON A.target_id = B.source_id
-      JOIN Airports ASrc ON A.source_id = ASrc.id
-      JOIN Airports BTgt ON B.target_id = BTgt.id
-      JOIN Airports ABtgt ON A.target_id = ABtgt.id
-      JOIN Airlines Airline1 ON Airline1.id = A.airline_id
-      JOIN Airlines Airline2 ON Airline2.id = B.airline_id
-      WHERE A.source_id <> B.target_id AND ASrc.city = '${req.query.fromCity}' AND BTgt.city = '${req.query.midCity}'
-      LIMIT 10)
 
-      UNION ALL 
+    UNION ALL
 
+    SELECT DISTINCT
+        1 AS num_stops,
+        A.source_id AS source_id,
+        ASrc.name AS source_name,
+        B.target_id AS target_id,
+        BTgt.name AS target_name,
+        ABtgt.name AS stop1_name,
+        NULL AS stop2_name,
+        Airline1.name AS airline1,
+        Airline2.name AS airline2,
+        'First Trip' AS TripStatus
+    FROM possible A
+    JOIN possible B ON A.target_id = B.source_id
+    JOIN Airports ASrc ON A.source_id = ASrc.id
+    JOIN Airports BTgt ON B.target_id = BTgt.id
+    JOIN Airports ABtgt ON A.target_id = ABtgt.id
+    JOIN Airlines Airline1 ON Airline1.id = A.airline_id
+    JOIN Airlines Airline2 ON Airline2.id = B.airline_id
+    WHERE A.source_id <> B.target_id AND ASrc.city = '${req.query.fromCity}' AND BTgt.city = '${req.query.midCity}')),
+  secondTrips AS (
       (SELECT DISTINCT
-          0 AS num_stops,
-          A.source_id AS source_id,
-          ASrc.name AS source_name,
-          A.target_id AS target_id,
-          ATgt.name AS target_name,
-          NULL AS stop1_name,
-          NULL AS stop2_name,
-          NULL AS airline1,
-          NULL AS airline2,
-          'Second Trip' AS TripStatus
-      FROM possible A
-      JOIN Airports ASrc ON A.source_id = ASrc.id 
-      JOIN Airports ATgt ON A.target_id = ATgt.id
-      JOIN Airlines X ON X.id = A.airline_id
-      WHERE ASrc.city = '${req.query.midCity}' AND ATgt.city = '${req.query.toCity}')
-      
+        0 AS num_stops,
+        A.source_id AS source_id,
+        ASrc.name AS source_name,
+        A.target_id AS target_id,
+        ATgt.name AS target_name,
+        NULL AS stop1_name,
+        NULL AS stop2_name,
+        X.name AS airline1,
+        NULL AS airline2,
+        'Second Trip' AS TripStatus
+    FROM possible A
+    JOIN Airports ASrc ON A.source_id = ASrc.id
+    JOIN Airports ATgt ON A.target_id = ATgt.id
+    JOIN Airlines X ON X.id = A.airline_id
+    WHERE ASrc.city = '${req.query.midCity}' AND ATgt.city = '${req.query.toCity}'
 
-      UNION ALL
-  
-      (SELECT DISTINCT
-          1 AS num_stops,
-          A.source_id AS source_id,
-          ASrc.name AS source_name,
-          B.target_id AS target_id,
-          BTgt.name AS target_name,
-          ABtgt.name AS stop1_name,
-          NULL AS stop2_name,
-          Airline1.name AS airline1,
-          Airline2.name AS airline2,
-          'Second Trip' AS TripStatus
-      FROM possible A
-      JOIN possible B ON A.target_id = B.source_id
-      JOIN Airports ASrc ON A.source_id = ASrc.id
-      JOIN Airports BTgt ON B.target_id = BTgt.id
-      JOIN Airports ABtgt ON A.target_id = ABtgt.id
-      JOIN Airlines Airline1 ON Airline1.id = A.airline_id
-      JOIN Airlines Airline2 ON Airline2.id = B.airline_id
-      WHERE A.source_id <> B.target_id AND ASrc.city = '${req.query.midCity}' AND BTgt.city = '${req.query.toCity}'
-      LIMIT 10)
-    )
-    SELECT
-      num_stops,
-      source_name,
-      stop1_name,
-      stop2_name,
-      airline1, 
-      airline2,
-      target_name,
-      TripStatus
-    FROM routes
-    ORDER BY num_stops, source_name, target_name;
+
+    UNION ALL
+
+    SELECT DISTINCT
+        1 AS num_stops,
+        A.source_id AS source_id,
+        ASrc.name AS source_name,
+        B.target_id AS target_id,
+        BTgt.name AS target_name,
+        ABtgt.name AS stop1_name,
+        NULL AS stop2_name,
+        Airline1.name AS airline1,
+        Airline2.name AS airline2,
+        'Second Trip' AS TripStatus
+    FROM possible A
+    JOIN possible B ON A.target_id = B.source_id
+    JOIN Airports ASrc ON A.source_id = ASrc.id
+    JOIN Airports BTgt ON B.target_id = BTgt.id
+    JOIN Airports ABtgt ON A.target_id = ABtgt.id
+    JOIN Airlines Airline1 ON Airline1.id = A.airline_id
+    JOIN Airlines Airline2 ON Airline2.id = B.airline_id
+    WHERE A.source_id <> B.target_id AND ASrc.city = '${req.query.midCity}' AND BTgt.city = '${req.query.toCity}'))
+    SELECT startTrips.num_stops AS firstNumStops, startTrips.source_name AS firstDestination, startTrips.stop1_name AS firstTripStop, startTrips.airline1 AS firstAirline, startTrips.airline2 as firstAirline2, secondTrips.source_name AS secondDestination, secondTrips.num_stops AS secondTripStops, secondTrips.stop1_name AS secondStop1, secondTrips.airline1 AS secondTripAirline1, secondTrips.airline2 AS secondTripAirline2, secondTrips.target_name AS finalDestination
+    FROM startTrips JOIN secondTrips ON startTrips.target_name = secondTrips.source_name
+    LIMIT 50;
     `, (err, data) => {
       if (err) {
         console.log(err);
