@@ -199,7 +199,7 @@ var findHotelsWithIncomingFlights = function (req, res) {
     JOIN Airlines Airline1 ON Airline1.id = A.airline_id
     JOIN Airlines Airline2 ON Airline2.id = B.airline_id
     WHERE A.source_id <> B.target_id AND ASrc.city = '${req.query.midCity}' AND BTgt.city = '${req.query.toCity}'))
-    SELECT startTrips.num_stops AS firstNumStops, startTrips.source_name AS firstDestination, startTrips.stop1_name AS firstTripStop, startTrips.airline1 AS firstAirline, startTrips.airline2 as firstAirline2, secondTrips.source_name AS secondDestination, secondTrips.num_stops AS secondTripStops, secondTrips.stop1_name AS secondStop1, secondTrips.airline1 AS secondTripAirline1, secondTrips.airline2 AS secondTripAirline2, secondTrips.target_name AS finalDestination
+    SELECT startTrips.num_stops AS firstNumStops, startTrips.source_name AS first, startTrips.stop1_name AS second, startTrips.airline1 AS firstAirline, startTrips.airline2 as secondAirline, secondTrips.source_name AS third, secondTrips.num_stops AS secondNumStops, secondTrips.stop1_name AS fourth, secondTrips.airline1 AS thirdAirline, secondTrips.airline2 AS fourthAirline, secondTrips.target_name AS fifth
     FROM startTrips JOIN secondTrips ON startTrips.target_name = secondTrips.source_name
     LIMIT 50;
     `, (err, data) => {
@@ -265,7 +265,6 @@ var findHotelsWithIncomingFlights = function (req, res) {
       stop2_name,
       airline1, 
       airline2,
-      airline3,
       target_name
     FROM routes
     ORDER BY num_stops, source_name, target_name;
@@ -401,11 +400,12 @@ var findHotelsWithIncomingFlights = function (req, res) {
     });
   }
 
-  const getDistinctCities = function(res, req) {
+  const getDistinctCities = function(req, res) {
     connection.query(`
     SELECT DISTINCT city
     FROM Airports
-    WHERE city like '${req.query.string}%'
+    WHERE city LIKE '${req.query.string}%'
+    LIMIT 10
     `, (err, data) => {
       if (err) {
         console.log(err);

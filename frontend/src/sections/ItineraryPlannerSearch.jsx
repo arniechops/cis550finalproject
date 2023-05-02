@@ -4,12 +4,13 @@ import { Avatar, Box, Button, Card, Checkbox, Flex, HStack, IconButton, Input, T
 import DropdownInputFlights from '../components/DropdownInputFlights';
 import DropdownInput from '../components/DropdownInput';
 
-export default function ItineraryPlannerSearch({setResults, }) {
+export default function ItineraryPlannerSearch({setResults }) {
 
     const [extraStop, setExtraStop] = useState(false);
     const [from, setFrom] = useState("");
     const [to, setTo] = useState("");
     const [final, setFinal] = useState("");
+
 
     function handleSubmit() {
         if (!from || !to || (extraStop && !final)) {
@@ -20,11 +21,11 @@ export default function ItineraryPlannerSearch({setResults, }) {
             alert("Two of the stops are the same")
             return
         }
-        const url = '/gettrip';
+        const url = '/flightswiththreestops';
         const params = {
-            from: from,
-            to: to,
-            final: final
+            fromCity: from,
+            midCity: to,
+            toCity: final
         };
 
         const queryString = Object.keys(params)
@@ -35,6 +36,7 @@ export default function ItineraryPlannerSearch({setResults, }) {
             .then(response => response.json())
             .then(data => {
                 setResults(data)
+                console.log(data)
             })
             .catch(error => {
                 console.error(error);

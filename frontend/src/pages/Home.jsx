@@ -13,7 +13,8 @@ export const FlightsContext = createContext()
 
 export default function Home() {
 
-    const [flightResults, setFlightResults] = useState([]);
+    const [flightResults1, setFlightResults1] = useState([]);
+    const [flightResults2, setFlightResults2] = useState([]);
     const [hotelResults, setHotelResults] = useState([]);
     const [itineraryFlightResults, setItineraryFlightResults] = useState([])
     const [airlinesResults, setAirlinesResults] = useState([])
@@ -39,8 +40,8 @@ export default function Home() {
 
         <TabPanels>
             <TabPanel>
-                <FlightSearch setResults={setFlightResults}/>
-                <FlightResults results={flightResults}/>
+                <FlightSearch setResults1={setFlightResults1} setResults2={setFlightResults2}/>
+                <FlightResults results1={flightResults1} results2={flightResults2}/>
             </TabPanel>
             <TabPanel>
                 <CitySearch setResults={setHotelResults}/>
