@@ -2,13 +2,14 @@ import { InfoIcon } from '@chakra-ui/icons'
 import { Badge, Box, Button, Checkbox, Grid, GridItem, HStack, IconButton, Popover, PopoverArrow, PopoverBody, PopoverCloseButton, PopoverContent, PopoverHeader, PopoverTrigger, Slider, SliderFilledTrack, SliderMark, SliderThumb, SliderTrack, Text, Tooltip } from '@chakra-ui/react'
 import React, { useState } from 'react'
 
-export default function PopoverFilteringComponent({setter}) {
+export default function PopoverFilteringComponent({sliderSetter, checkboxSetter}) {
 
     const [sliderValue, setSliderValue] = useState(0)
+    const [selectedTypes, setSelectedTypes] = useState(["sleep", "eat", "other", "do", "see", "drink"]);
 
     const labelStyles = {
       mt: '2',
-      ml: '-2.5',
+      offset: '-2.5',
       fontSize: 'sm',
     }
 
@@ -23,6 +24,21 @@ export default function PopoverFilteringComponent({setter}) {
         "do": "yellow"
     }
 
+    const Tag = ({value}) => {
+        return (
+            <Checkbox
+                onChange={() => {
+                    const newArr = selectedTypes.includes(value) ? selectedTypes.filter(x => x !== value) : [...selectedTypes, value]
+                    setSelectedTypes(newArr)
+                    checkboxSetter(newArr)
+                }}
+                isChecked={selectedTypes.includes(value)}
+                >
+                    <Badge colorScheme={colors[value]}>{value}</Badge>
+                </Checkbox>
+        )
+    }
+
   return (
     <Popover>
         <PopoverTrigger>
@@ -34,10 +50,10 @@ export default function PopoverFilteringComponent({setter}) {
             <PopoverHeader>Filter</PopoverHeader>
             <PopoverBody>
                 <Box pt={6} pb={2} p={2}>
-                    <Text mb={2} as="b">Distance</Text>
+                    <Text as="b">Distance</Text>
                     <Slider onChange={(val) => {
                         setSliderValue(val)
-                        setter(val)
+                        sliderSetter(val)
                     }} max={10}>
                         <SliderMark value={0} {...labelStyles}>
                         0
@@ -66,10 +82,8 @@ export default function PopoverFilteringComponent({setter}) {
                 <Grid templateColumns='repeat(3, 1fr)' gap={3} mt={2}>
                     {
                         colorOptions.map(elt => {
-                            return <GridItem>
-                                <Checkbox alignItems={"center"}>
-                                    <Badge colorScheme={colors[elt]}>{elt}</Badge>
-                                </Checkbox>
+                            return <GridItem key={elt}>
+                                <Tag value={elt}/>
                             </GridItem>
                         })
                     }

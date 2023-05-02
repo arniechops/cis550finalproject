@@ -1,5 +1,3 @@
-const vals = ["HKB", "FAI", "BJA", "MRS", "ALG", "CDG"]
-
 const mysql = require('mysql')
 const config = require('./config.json')
 
@@ -33,8 +31,19 @@ var getFlights = function (req, res) {
     });
 }
 
-var getAllFlights = function (req, res) {
-    res.json(vals)
+var getDistinctCities = function (req, res) {
+    connection.query(`
+    SELECT DISTINCT city
+    FROM Airports
+    WHERE city LIKE '${req.query.string}%'
+    LIMIT 10`,
+    (err, data) => {
+        if (err) {
+          console.log(err);
+        } else if (data) {
+          res.json(data);
+        }
+      });
 }
 
 var findHotelsWithIncomingFlights = function (req, res) {
@@ -166,7 +175,7 @@ var findHotelsWithIncomingFlights = function (req, res) {
   var findNearbyHotels = function (req, res) {
     //takes in an airport (req.query.airport) and finds top X (req.query.limit) nearby hotels, ordered by distance 
     connection.query(`
-    SELECT h.title, h.type, h.description, h.article,
+    SELECT h.title, h.type, h.description, h.article, h.url,
     (6371 * ACOS(COS(RADIANS(a.lat)) * COS(RADIANS(h.latitude)) * COS(RADIANS(a.lon) - RADIANS(h.longitude)) + SIN(RADIANS(a.lat)) * SIN(RADIANS(h.latitude)))) AS distance
     FROM Airports a
     INNER JOIN hotels h ON (6371 * ACOS(COS(RADIANS(a.lat)) * COS(RADIANS(h.latitude)) * COS(RADIANS(a.lon) - RADIANS(h.longitude)) + SIN(RADIANS(a.lat)) * SIN(RADIANS(h.latitude)))) < ${req.query.distance ?? 10}
@@ -203,13 +212,13 @@ var findHotelsWithIncomingFlights = function (req, res) {
 
 var routes = {
     getFlights,
-    getAllFlights, 
     findHotelsWithIncomingFlights, 
     findAirportsWithNearbyHotels,
     findUnited, 
     findflightswithstops, 
     findNearbyHotels,
-    getTrip
+    getTrip,
+    getDistinctCities,
 };
 
 module.exports = routes;

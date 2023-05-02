@@ -5,7 +5,8 @@ import CityResults from '../sections/CityResults';
 import CitySearch from '../sections/CitySearch';
 import FlightResults from '../sections/FlightResults';
 import FlightSearch from '../sections/FlightSearch';
-import Sidebar from '../sections/Sidebar';
+import ItineraryPlannerResults from '../sections/ItineraryPlannerResults';
+import ItineraryPlannerSearch from '../sections/ItineraryPlannerSearch';
 
 export const FlightsContext = createContext()
 
@@ -13,6 +14,7 @@ export default function Home() {
 
     const [flightResults, setFlightResults] = useState([]);
     const [hotelResults, setHotelResults] = useState([]);
+    const [itineraryFlightResults, setItineraryFlightResults] = useState([])
 
   return (
     <Box>
@@ -29,6 +31,7 @@ export default function Home() {
         <TabList>
             <Tab>Flights</Tab>
             <Tab>Hotels</Tab>
+            <Tab>Itinerary Planner</Tab>
         </TabList>
 
         <TabPanels>
@@ -39,6 +42,10 @@ export default function Home() {
             <TabPanel>
                 <CitySearch setResults={setHotelResults}/>
                 <CityResults results={hotelResults}/>
+            </TabPanel>
+            <TabPanel>
+                <ItineraryPlannerSearch setResults={setItineraryFlightResults}/>
+                <ItineraryPlannerResults results={itineraryFlightResults}/>
             </TabPanel>
         </TabPanels>
         </Tabs>

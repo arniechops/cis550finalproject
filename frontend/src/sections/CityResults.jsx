@@ -1,4 +1,5 @@
-import { Badge, Box, Center, Flex, Grid, GridItem, Image, Text } from '@chakra-ui/react'
+import { ExternalLinkIcon } from '@chakra-ui/icons'
+import { Badge, Box, Center, Flex, Grid, GridItem, Image, Link, Text } from '@chakra-ui/react'
 import React from 'react'
 
 export default function CityResults({results}) {
@@ -41,6 +42,11 @@ export default function CityResults({results}) {
                             <b>4.84</b> (190)
                         </Text>
                         </Flex>
+                        {
+                            res.url && <Link href={res.url} color="teal" isExternal>
+                                Visit page <ExternalLinkIcon mx='2px' />
+                            </Link>
+                        }
                     </GridItem>
                 })
             }

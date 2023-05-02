@@ -10,10 +10,10 @@ app.listen(port, () => {
 });
 
 app.get('/getflights', routes.getFlights)
-app.get('/getallflights', routes.getAllFlights);
 app.get('/gettrip', routes.getTrip)
 app.get('/findhotelswithincomingflights', routes.findHotelsWithIncomingFlights);
 app.get('/findairportswithnearbyhotels', routes.findAirportsWithNearbyHotels);
 app.get('/findunited', routes.findUnited);
 app.get('/findflightswithtwostops', routes.findflightswithstops);
 app.get('/findnearbyhotels', routes.findNearbyHotels);
+app.get('/getdistinctcities', routes.getDistinctCities);

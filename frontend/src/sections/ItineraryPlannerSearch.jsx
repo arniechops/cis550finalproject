@@ -2,11 +2,9 @@ import React, { useContext, useEffect, useState } from 'react'
 import { AddIcon, ArrowForwardIcon, CloseIcon, PlusSquareIcon } from '@chakra-ui/icons'
 import { Avatar, Box, Button, Card, Checkbox, Flex, HStack, IconButton, Input, Text, VStack } from '@chakra-ui/react'
 import DropdownInputFlights from '../components/DropdownInputFlights';
-import useGet from '../hooks/useGet';
-import { FlightsContext } from '../pages/Home';
 import DropdownInput from '../components/DropdownInput';
 
-export default function FlightSearch({setResults}) {
+export default function ItineraryPlannerSearch({setResults, }) {
 
     const [extraStop, setExtraStop] = useState(false);
     const [from, setFrom] = useState("");
@@ -42,23 +40,24 @@ export default function FlightSearch({setResults}) {
                 console.error(error);
             });
     }
-
   return (
-    <form>
+    <div>
         <HStack w="100wh" align="center" justify="center" mt={10} spacing={2} mb={3}>
-            <DropdownInputFlights placeholder={"From"} setter={setFrom}/>
+            <DropdownInput placeholder={"City"} setter={setFrom} route={'/getdistinctcities?string='}
+            dataItemShow="city" dataItemSet="city"/>
             <Box align="center" justify="center">
                 <ArrowForwardIcon w="6" h="6" />
             </Box>
-            <DropdownInputFlights placeholder={"From"} setter={setTo}/>
+            <DropdownInput placeholder={"City"} setter={setTo} route={'/getdistinctcities?string='}
+            dataItemShow="city" dataItemSet="city"/>
             {
                 extraStop && (
                     <>
                         <Box align="center" justify="center">
                             <ArrowForwardIcon w="6" h="6" />
                         </Box>
-                        <DropdownInputFlights placeholder={"Final"} route={'/getallflights'} setter={setFinal}/>
-                    </>
+                        <DropdownInput placeholder={"City"} setter={setFinal} route={'/getdistinctcities?string='}
+            dataItemShow="city" dataItemSet="city"/>                    </>
                 )
             }
             <IconButton size="sm" rounded={"full"} colorScheme={extraStop ? "red" : "gray"}
@@ -68,6 +67,6 @@ export default function FlightSearch({setResults}) {
         <Flex w="full" justify={"center"}>
             <Button colorScheme="teal" onClick={handleSubmit}>Search for flights!</Button>
         </Flex>
-    </form>
+    </div>
   )
 }

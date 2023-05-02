@@ -10,12 +10,15 @@ export default function CitySearch({setResults}) {
 
   const [value, setValue] = useState("")
   const [sliderVal, setSliderVal] = useState(10)
+  const [checkboxValues, setCheckboxValues] = useState(["sleep", "eat", "other", "do", "see", "drink"])
+
+  console.log(checkboxValues)
 
   function handleSubmit() {
     fetch(`/findnearbyhotels?airport=${value}&distance=${sliderVal}`)
             .then(response => response.json())
             .then(data => {
-              setResults(data)
+              setResults(data.filter(x => checkboxValues.includes(x.type)))
             })
             .catch(error => {
                 console.error(error);
@@ -29,7 +32,7 @@ export default function CitySearch({setResults}) {
             <DropdownInput placeholder={"Give us a location or airport..."} width={400} setter={setValue}
             dataItemShow={"full"} dataItemSet={"name"} route={"/getflights?string="}
             />
-        <PopoverFilteringComponent setter={setSliderVal}/>
+        <PopoverFilteringComponent sliderSetter={setSliderVal} checkboxSetter={setCheckboxValues}/>
         </HStack>
         <Flex w="full" justify={"center"}>
             <Button colorScheme="teal" onClick={handleSubmit}>Search for hotels!</Button>
