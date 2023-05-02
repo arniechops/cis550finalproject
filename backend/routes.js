@@ -31,40 +31,56 @@ var getFlights = function (req, res) {
     });
 }
 
-var getDistinctCities = function (req, res) {
-    connection.query(`
-    SELECT DISTINCT city
-    FROM Airports
-    WHERE city LIKE '${req.query.string}%'
-    LIMIT 10`,
-    (err, data) => {
-        if (err) {
-          console.log(err);
-        } else if (data) {
-          res.json(data);
-        }
-      });
+var getAllFlights = function (req, res) {
+    res.json(vals)
+}
+
+var findHotelBySearch = function (req, res) {
+  //const country = req.query.country;
+  connection.query(`
+  SELECT 
+  COALESCE(h.title) AS hotel_name,
+  COALESCE(h.address, 'Not Listed') AS address,
+  COALESCE(h.hours, 'Not Listed') AS hours,
+  COALESCE(h.url, 'Not Listed') AS url,
+  COALESCE(h.phone, 'Not Listed') AS phone_number,
+  COALESCE(h.price, 'Not Listed') AS price,
+  COALESCE(h.description, 'Not Listed') AS description
+  FROM 
+    hotels h 
+  WHERE 
+    h.title = '${req.query.title}'
+  ORDER BY 
+    h.title, h.address
+
+  `, (err, data) => {
+    if (err) {
+      console.log(err);
+    } else if (data) {
+      res.json(data);
+    }
+  });
 }
 
 var findHotelsWithIncomingFlights = function (req, res) {
     //const country = req.query.country;
     connection.query(`
-    SELECT h.title, h.address, h.latitude, h.longitude
-    FROM hotels h
-    INNER JOIN (
-    SELECT a.lat, a.lon, COUNT(DISTINCT r.source_id) AS num_incoming_flights
+    CREATE VIEW airport_flights AS
+    (SELECT a.id, COUNT(DISTINCT r.source_id) AS num_incoming_flights
     FROM Airports a
     INNER JOIN Routes r ON a.id = r.target_id
-    WHERE r.source_id IN (
-        SELECT id
-        FROM Airports
-        WHERE country = '${req.query.country}'
-    )
-    AND a.country <> '${req.query.country}'
-    GROUP BY a.lat, a.lon
-    HAVING COUNT(DISTINCT r.source_id) >= 10
-    ) c ON (6371 * acos(cos(radians(h.latitude)) * cos(radians(c.lat)) * cos(radians(c.lon) - radians(h.longitude)) + sin(radians(h.latitude)) * sin(radians(c.lat)))) <= 10
-    ORDER BY (6371 * acos(cos(radians(h.latitude)) * cos(radians(c.lat)) * cos(radians(c.lon) - radians(h.longitude)) + sin(radians(h.latitude)) * sin(radians(c.lat)))) ASC;
+    GROUP BY a.id)
+
+    SELECT h.title, h.address, h.latitude, h.longitude
+    FROM (
+    SELECT h.id, (6371 * acos(cos(radians(h.latitude)) * cos(radians(a.lat)) * cos(radians(a.lon) - radians(h.longitude)) + sin(radians(h.latitude)) * sin(radians(a.lat)))) AS distance
+    FROM hotels h
+    INNER JOIN Airports a ON a.country = 'United States' AND a.country <> 'United States'
+    ) h2
+    INNER JOIN airport_flights af ON af.id = h2.id AND af.num_incoming_flights >= 10
+    INNER JOIN hotels h ON h.id = h2.id
+    WHERE h2.distance <= 10
+    ORDER BY h2.distance ASC;
 
     `, (err, data) => {
       if (err) {
@@ -76,7 +92,7 @@ var findHotelsWithIncomingFlights = function (req, res) {
   }
 
   var findAirportsWithNearbyHotels = function (req, res) {
-    //finds airports with at least5 hotels in a 5 mile radius given the city
+    //given a city, finds airports with at least 5 hotels in a 5 mile radius given the city
     connection.query(`
         SELECT a.id, a.name, a.city, a.country, a.lat, a.lon, a.alt, a.timezone, COUNT(DISTINCT h.article) AS num_hotels
         FROM Airports a
@@ -110,59 +126,182 @@ var findHotelsWithIncomingFlights = function (req, res) {
       }
     });
   }
-
-  var findflightswithstops = function (req, res) {
-    //takes in a country and returns all names and ids of flight routes and the number of stops (0, 1, 2)
+  
+  var flightsWithThreeStops = function (req, res) {
+    //takes in a country and returns all names and ids of flight routes and the number of stops (0, 1)
     connection.query(`
     WITH possible AS (
-        WITH frenchCountries AS (
-            SELECT id, name FROM Airports WHERE country = '${req.query.country}'
-        )
-        SELECT source_id, target_id FROM Routes
-        WHERE source_id IN (SELECT id FROM frenchCountries) AND target_id IN (SELECT id FROM frenchCountries)
+        SELECT source_id, target_id, airline_id FROM Routes
+        WHERE source_id IN (SELECT id FROM Airports) AND target_id IN (SELECT id FROM Airports)
+    ),
+    routes AS (
+      (SELECT DISTINCT
+          0 AS num_stops,
+          A.source_id AS source_id,
+          ASrc.name AS source_name,
+          A.target_id AS target_id,
+          ATgt.name AS target_name,
+          NULL AS stop1_name,
+          NULL AS stop2_name,
+          NULL AS airline1,
+          NULL AS airline2,
+          NULL AS airline3,
+          'First Trip' AS TripStatus
+      FROM possible A
+      JOIN Airports ASrc ON A.source_id = ASrc.id 
+      JOIN Airports ATgt ON A.target_id = ATgt.id
+      JOIN Airlines X ON X.id = A.airline_id
+      WHERE ASrc.city = '${req.query.fromCity}' AND ATgt.city = '${req.query.midCity}'
+      LIMIT 10)
+
+      UNION ALL
+  
+      (SELECT DISTINCT
+          1 AS num_stops,
+          A.source_id AS source_id,
+          ASrc.name AS source_name,
+          B.target_id AS target_id,
+          BTgt.name AS target_name,
+          ABtgt.name AS stop1_name,
+          NULL AS stop2_name,
+          Airline1.name AS airline1,
+          Airline2.name AS airline2,
+          NULL AS airline3,
+          'First Trip' AS TripStatus
+      FROM possible A
+      JOIN possible B ON A.target_id = B.source_id
+      JOIN Airports ASrc ON A.source_id = ASrc.id
+      JOIN Airports BTgt ON B.target_id = BTgt.id
+      JOIN Airports ABtgt ON A.target_id = ABtgt.id
+      JOIN Airlines Airline1 ON Airline1.id = A.airline_id
+      JOIN Airlines Airline2 ON Airline2.id = B.airline_id
+      WHERE A.source_id <> B.target_id AND ASrc.city = '${req.query.fromCity}' AND BTgt.city = '${req.query.midCity}'
+      LIMIT 10)
+
+      UNION ALL 
+
+      (SELECT DISTINCT
+          0 AS num_stops,
+          A.source_id AS source_id,
+          ASrc.name AS source_name,
+          A.target_id AS target_id,
+          ATgt.name AS target_name,
+          NULL AS stop1_name,
+          NULL AS stop2_name,
+          NULL AS airline1,
+          NULL AS airline2,
+          NULL AS airline3,
+          'Second Trip' AS TripStatus
+      FROM possible A
+      JOIN Airports ASrc ON A.source_id = ASrc.id 
+      JOIN Airports ATgt ON A.target_id = ATgt.id
+      JOIN Airlines X ON X.id = A.airline_id
+      WHERE ASrc.city = '${req.query.midCity}' AND ATgt.city = '${req.query.toCity}')
+      
+
+      UNION ALL
+  
+      (SELECT DISTINCT
+          1 AS num_stops,
+          A.source_id AS source_id,
+          ASrc.name AS source_name,
+          B.target_id AS target_id,
+          BTgt.name AS target_name,
+          ABtgt.name AS stop1_name,
+          NULL AS stop2_name,
+          Airline1.name AS airline1,
+          Airline2.name AS airline2,
+          NULL AS airline3,
+          'Second Trip' AS TripStatus
+      FROM possible A
+      JOIN possible B ON A.target_id = B.source_id
+      JOIN Airports ASrc ON A.source_id = ASrc.id
+      JOIN Airports BTgt ON B.target_id = BTgt.id
+      JOIN Airports ABtgt ON A.target_id = ABtgt.id
+      JOIN Airlines Airline1 ON Airline1.id = A.airline_id
+      JOIN Airlines Airline2 ON Airline2.id = B.airline_id
+      WHERE A.source_id <> B.target_id AND ASrc.city = '${req.query.midCity}' AND BTgt.city = '${req.query.toCity}'
+      LIMIT 10)
     )
-    SELECT DISTINCT
-        0 as num_stops,
-        A.source_id as source_id,
-        ASrc.name as source_name,
-        A.target_id as target_id,
-        ATgt.name as target_name
-    FROM possible A 
-    JOIN Airports ASrc ON A.source_id = ASrc.id
-    JOIN Airports ATgt ON A.target_id = ATgt.id
-    GROUP BY source_id, target_id, source_name, target_name
-    
-    UNION ALL
-    
-    SELECT DISTINCT 
-        1 as num_stops, 
-        A.source_id as source_id, 
-        ASrc.name as source_name,
-        B.target_id as target_id, 
-        BTgt.name as target_name
-    FROM possible A
-    JOIN possible B ON A.target_id = B.source_id
-    JOIN Airports ASrc ON A.source_id = ASrc.id
-    JOIN Airports BTgt ON B.target_id = BTgt.id
-    WHERE A.source_id <> B.target_id
-    GROUP BY source_id, target_id, source_name, target_name
-    
-    UNION ALL
-    
-    SELECT DISTINCT 
-        2 as num_stops, 
-        A.source_id as source_id, 
-        ASrc.name as source_name,
-        C.target_id as target_id, 
-        CTgt.name as target_name
-    FROM possible A
-    JOIN possible B ON A.target_id = B.source_id
-    JOIN possible C ON B.target_id = C.source_id
-    JOIN Airports ASrc ON A.source_id = ASrc.id
-    JOIN Airports CTgt ON C.target_id = CTgt.id
-    WHERE A.source_id <> C.source_id AND A.source_id <> B.target_id AND B.source_id <> C.target_id AND A.target_id <> C.target_id AND A.source_id <> C.target_id
-    GROUP BY source_id, target_id, source_name, target_name;
-    
+    SELECT
+      num_stops,
+      source_name,
+      stop1_name,
+      stop2_name,
+      airline1, 
+      airline2,
+      airline3,
+      target_name,
+      TripStatus
+    FROM routes
+    ORDER BY num_stops, source_name, target_name;
+    `, (err, data) => {
+      if (err) {
+        console.log(err);
+      } else if (data) {
+        res.json(data);
+      }
+    });
+  }
+
+  var findflightswithstops = function (req, res) {
+    //takes in a country and returns all names and ids of flight routes and the number of stops (0, 1)
+    connection.query(`
+    WITH possible AS (
+        SELECT source_id, target_id, airline_id FROM Routes
+        WHERE source_id IN (SELECT id FROM Airports) AND target_id IN (SELECT id FROM Airports)
+    ),
+    routes AS (
+      SELECT DISTINCT
+          0 AS num_stops,
+          A.source_id AS source_id,
+          ASrc.name AS source_name,
+          A.target_id AS target_id,
+          ATgt.name AS target_name,
+          NULL AS stop1_name,
+          NULL AS stop2_name,
+          NULL AS airline1,
+          NULL AS airline2,
+          NULL AS airline3
+      FROM possible A
+      JOIN Airports ASrc ON A.source_id = ASrc.id 
+      JOIN Airports ATgt ON A.target_id = ATgt.id
+      JOIN Airlines X ON X.id = A.airline_id
+      WHERE ASrc.city = '${req.query.fromCity}' AND ATgt.city = '${req.query.toCity}'
+      
+      UNION ALL
+  
+      SELECT DISTINCT
+          1 AS num_stops,
+          A.source_id AS source_id,
+          ASrc.name AS source_name,
+          B.target_id AS target_id,
+          BTgt.name AS target_name,
+          ABtgt.name AS stop1_name,
+          NULL AS stop2_name,
+          Airline1.name AS airline1,
+          Airline2.name AS airline2,
+          NULL AS airline3
+      FROM possible A
+      JOIN possible B ON A.target_id = B.source_id
+      JOIN Airports ASrc ON A.source_id = ASrc.id
+      JOIN Airports BTgt ON B.target_id = BTgt.id
+      JOIN Airports ABtgt ON A.target_id = ABtgt.id
+      JOIN Airlines Airline1 ON Airline1.id = A.airline_id
+      JOIN Airlines Airline2 ON Airline2.id = B.airline_id
+      WHERE A.source_id <> B.target_id AND ASrc.city = '${req.query.fromCity}' AND BTgt.city = '${req.query.toCity}'
+    )
+    SELECT
+      num_stops,
+      source_name,
+      stop1_name,
+      stop2_name,
+      airline1, 
+      airline2,
+      airline3,
+      target_name
+    FROM routes
+    ORDER BY num_stops, source_name, target_name;
     `, (err, data) => {
       if (err) {
         console.log(err);
@@ -208,6 +347,106 @@ var findHotelsWithIncomingFlights = function (req, res) {
       }
     });
   }
+
+  var findBusiestAirports = function(req, res) {
+    connection.query(`
+    SELECT a.name AS airport_name, COUNT(*) AS num_flights, GROUP_CONCAT(DISTINCT al.name ORDER BY al.name SEPARATOR ', ') AS airlines
+    FROM Airports a
+    INNER JOIN (
+        SELECT source_id AS airport_id, airline_id FROM Routes
+        UNION ALL
+        SELECT target_id AS airport_id, airline_id FROM Routes
+    ) r ON a.id = r.airport_id
+    INNER JOIN Airlines al ON r.airline_id = al.id
+    GROUP BY a.id
+    ORDER BY num_flights DESC
+    LIMIT 10;
+    `, (err, data) => {
+      if (err) {
+        console.log(err);
+      } else if (data) {
+        res.json(data);
+      }
+    });
+  }
+
+  var findBusiestAirlines = function(req, res) {
+    connection.query(`
+    WITH airline_route_counts AS (
+      SELECT airline_id, COUNT(*) AS num_routes
+      FROM Routes
+      GROUP BY airline_id
+  ),
+  top_airlines AS (
+      SELECT airline_id
+      FROM airline_route_counts
+      ORDER BY num_routes DESC
+      LIMIT 10
+  ),
+  source_airport_counts AS (
+      SELECT airline_id, source_id AS airport_id, COUNT(*) AS num_routes
+      FROM Routes
+      GROUP BY airline_id, source_id
+  ),
+  target_airport_counts AS (
+      SELECT airline_id, target_id AS airport_id, COUNT(*) AS num_routes
+      FROM Routes
+      GROUP BY airline_id, target_id
+  ),
+  top_source_airports AS (
+      SELECT airline_id, airport_id
+      FROM (
+          SELECT airline_id, airport_id, ROW_NUMBER() OVER (PARTITION BY airline_id ORDER BY num_routes DESC) AS row_num
+          FROM source_airport_counts
+          WHERE airline_id IN (SELECT airline_id FROM top_airlines)
+      ) sub
+      WHERE row_num <= 10
+  ),
+  top_target_airports AS (
+      SELECT airline_id, airport_id
+      FROM (
+          SELECT airline_id, airport_id, ROW_NUMBER() OVER (PARTITION BY airline_id ORDER BY num_routes DESC) AS row_num
+          FROM target_airport_counts
+          WHERE airline_id IN (SELECT airline_id FROM top_airlines)
+      ) sub
+      WHERE row_num <= 10
+  )
+  SELECT a.name AS airline_name, arc.num_routes AS num_routes,
+         GROUP_CONCAT(DISTINCT sa.name ORDER BY sa.name SEPARATOR ', ') AS source_airports,
+         GROUP_CONCAT(DISTINCT ta.name ORDER BY ta.name SEPARATOR ', ') AS target_airports
+  FROM Airlines a
+  INNER JOIN airline_route_counts arc ON a.id = arc.airline_id
+  INNER JOIN top_airlines ta ON a.id = ta.airline_id
+  INNER JOIN source_airport_counts sac ON a.id = sac.airline_id
+  INNER JOIN top_source_airports tsa ON sac.airline_id = tsa.airline_id AND sac.airport_id = tsa.airport_id
+  INNER JOIN target_airport_counts tac ON a.id = tac.airline_id
+  INNER JOIN top_target_airports tta ON tac.airline_id = tta.airline_id AND tac.airport_id = tta.airport_id
+  INNER JOIN Airports sa ON sac.airport_id = sa.id
+  INNER JOIN Airports ta ON tac.airport_id = ta.id
+  GROUP BY a.id
+  ORDER BY arc.num_routes DESC;
+    `, (err, data) => {
+      if (err) {
+        console.log(err);
+      } else if (data) {
+        res.json(data);
+      }
+    });
+  }
+
+  const getDistinctCities = function(res, req) {
+    connection.query(`
+    SELECT DISTINCT city
+    FROM Airports
+    WHERE city like '${req.query.string}%'
+    `, (err, data) => {
+      if (err) {
+        console.log(err);
+      } else if (data) {
+        res.json(data);
+      }
+    });
+  }
   
 
 var routes = {
@@ -219,6 +458,10 @@ var routes = {
     findNearbyHotels,
     getTrip,
     getDistinctCities,
+    findBusiestAirports, 
+    findBusiestAirlines, 
+    flightsWithThreeStops,
+    findHotelBySearch
 };
 
 module.exports = routes;

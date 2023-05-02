@@ -17,3 +17,7 @@ app.get('/findunited', routes.findUnited);
 app.get('/findflightswithtwostops', routes.findflightswithstops);
 app.get('/findnearbyhotels', routes.findNearbyHotels);
 app.get('/getdistinctcities', routes.getDistinctCities);
+app.get('/findbusiestairports', routes.findBusiestAirports);
+app.get('/findbusiestairlines', routes.findBusiestAirlines);
+app.get('/flightswiththreestops', routes.flightsWithThreeStops);
+app.get('/findhotelsbysearch', routes.findHotelBySearch);

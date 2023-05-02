@@ -32,6 +32,7 @@ export default function Home() {
             <Tab>Flights</Tab>
             <Tab>Hotels</Tab>
             <Tab>Itinerary Planner</Tab>
+            <Tab>Airlines</Tab>
         </TabList>
 
         <TabPanels>
@@ -46,6 +47,9 @@ export default function Home() {
             <TabPanel>
                 <ItineraryPlannerSearch setResults={setItineraryFlightResults}/>
                 <ItineraryPlannerResults results={itineraryFlightResults}/>
+            </TabPanel>
+            <TabPanel>
+                
             </TabPanel>
         </TabPanels>
         </Tabs>
