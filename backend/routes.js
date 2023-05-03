@@ -276,7 +276,7 @@ var findHotelsWithIncomingFlights = function (req, res) {
   var findNearbyHotels = function (req, res) {
     //takes in an airport (req.query.airport) and finds top X (req.query.limit) nearby hotels, ordered by distance 
     connection.query(`
-    SELECT h.title, h.type, h.description, h.article, h.url,
+    SELECT h.title, h.type, h.description, h.article, h.url, h.latitude, h.longitude,
     (6371 * ACOS(COS(RADIANS(a.lat)) * COS(RADIANS(h.latitude)) * COS(RADIANS(a.lon) - RADIANS(h.longitude)) + SIN(RADIANS(a.lat)) * SIN(RADIANS(h.latitude)))) AS distance
     FROM Airports a
     INNER JOIN hotels h ON (6371 * ACOS(COS(RADIANS(a.lat)) * COS(RADIANS(h.latitude)) * COS(RADIANS(a.lon) - RADIANS(h.longitude)) + SIN(RADIANS(a.lat)) * SIN(RADIANS(h.latitude)))) < ${req.query.distance ?? 10}

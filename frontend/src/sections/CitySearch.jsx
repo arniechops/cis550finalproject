@@ -12,8 +12,6 @@ export default function CitySearch({setResults}) {
   const [sliderVal, setSliderVal] = useState(10)
   const [checkboxValues, setCheckboxValues] = useState(["sleep", "eat", "other", "do", "see", "drink"])
 
-  console.log(checkboxValues)
-
   function handleSubmit() {
     fetch(`/findnearbyhotels?airport=${value}&distance=${sliderVal}`)
             .then(response => response.json())
