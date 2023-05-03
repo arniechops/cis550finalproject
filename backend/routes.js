@@ -61,7 +61,19 @@ var findHotelBySearch = function (req, res) {
 var findHotelsWithIncomingFlights = function (req, res) {
     //const country = req.query.country;
     connection.query(`
-    
+    SELECT h.title, h.address, h.latitude, h.longitude
+    FROM hotels h
+    INNER JOIN (
+    SELECT a.lat, a.lon, COUNT(DISTINCT r.source_id) AS num_incoming_flights FROM Airports a
+    INNER JOIN Routes r ON a.id = r.target_id WHERE r.source_id IN (
+    SELECT id
+    FROM Airports
+    WHERE country = '${req.query.country}'
+    )
+    AND a.country <> '${req.query.country}' GROUP BY a.lat, a.lon
+    HAVING COUNT(DISTINCT r.source_id) >= 10
+    ) c ON (6371 * acos(cos(radians(h.latitude)) * cos(radians(c.lat)) * cos(radians(c.lon) - radians(h.longitude)) + sin(radians(h.latitude)) * sin(radians(c.lat)))) <= 10
+    ORDER BY (6371 * acos(cos(radians(h.latitude)) * cos(radians(c.lat)) * cos(radians(c.lon) - radians(h.longitude)) + sin(radians(h.latitude)) * sin(radians(c.lat)))) ASC;
 
     `, (err, data) => {
       if (err) {
@@ -94,11 +106,14 @@ var findHotelsWithIncomingFlights = function (req, res) {
   var findUnited = function (req, res) {
     //takes in an airline name and returns all flights that have outgoing flight from an airline that has the same or similar name, such as United 
     connection.query(`
-        SELECT a.name, a.city
+        SELECT a.name, a.city, count(*) as cnt
         FROM Airports a
         INNER JOIN Routes r ON a.id = r.target_id
         INNER JOIN Airlines al ON r.airline_id = al.id
-        WHERE al.name LIKE '%${req.query.airline}%';
+        WHERE al.name LIKE '%${req.query.airline}%'
+        GROUP BY a.name, a.city
+        ORDER BY cnt DESC
+        LIMIT 20;
     `, (err, data) => {
       if (err) {
         console.log(err);
@@ -383,7 +398,6 @@ var findHotelsWithIncomingFlights = function (req, res) {
       SELECT airline_id
       FROM airline_route_counts
       ORDER BY num_routes DESC
-      LIMIT 10
   ),
   source_airport_counts AS (
       SELECT airline_id, source_id AS airport_id, COUNT(*) AS num_routes
@@ -426,7 +440,8 @@ var findHotelsWithIncomingFlights = function (req, res) {
   INNER JOIN Airports sa ON sac.airport_id = sa.id
   INNER JOIN Airports ta ON tac.airport_id = ta.id
   GROUP BY a.id
-  ORDER BY arc.num_routes DESC;
+  ORDER BY arc.num_routes DESC
+  LIMIT 10;
     `, (err, data) => {
       if (err) {
         console.log(err);
@@ -487,6 +502,21 @@ var findHotelsWithIncomingFlights = function (req, res) {
     }
   });
 }
+
+var getDistinctAirlines = function (req, res) {
+  connection.query(`
+  SELECT DISTINCT name
+  FROM Airlines
+  WHERE name LIKE '${req.query.airline}%'
+  LIMIT 10;
+`, (err, data) => {
+  if (err) {
+    console.log(err);
+  } else if (data) {
+    res.json(data);
+  }
+});
+}
   
 
 var routes = {
@@ -505,7 +535,8 @@ var routes = {
     findClosestHotel,
     findAttractions,
     airlinesByCountry,
-    getDistinctCountries
+    getDistinctCountries,
+    getDistinctAirlines
 };
 
 module.exports = routes;

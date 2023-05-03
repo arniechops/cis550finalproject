@@ -6,7 +6,7 @@ import DropdownInput from '../components/DropdownInput';
 
 export default function ItineraryPlannerSearch({setResults }) {
 
-    const [extraStop, setExtraStop] = useState(false);
+    const [extraStop, setExtraStop] = useState(true);
     const [from, setFrom] = useState("");
     const [to, setTo] = useState("");
     const [final, setFinal] = useState("");
@@ -62,9 +62,9 @@ export default function ItineraryPlannerSearch({setResults }) {
             dataItemShow="city" dataItemSet="city"/>                    </>
                 )
             }
-            <IconButton size="sm" rounded={"full"} colorScheme={extraStop ? "red" : "gray"}
+            {/* <IconButton size="sm" rounded={"full"} colorScheme={extraStop ? "red" : "gray"}
             icon={extraStop ? <CloseIcon/> : <AddIcon/>}
-            onClick={() => setExtraStop(!extraStop)}/>
+            onClick={() => setExtraStop(!extraStop)}/> */}
         </HStack>
         <Flex w="full" justify={"center"}>
             <Button colorScheme="teal" onClick={handleSubmit}>Search for flights!</Button>

@@ -1,9 +1,82 @@
-import { ExternalLinkIcon } from '@chakra-ui/icons'
-import { Badge, Box, Center, Flex, Grid, GridItem, Image, Link, Text } from '@chakra-ui/react'
-import React from 'react'
+import { Badge, Box, Center, Flex, Grid, GridItem, Image, Text, Link, } from '@chakra-ui/react'
+import {ExternalLinkIcon} from '@chakra-ui/icons'
+import React, {useMemo, useState, useRef, useCallback, useEffect} from 'react'
+import {GoogleMap, useLoadScript, Marker} from "@react-google-maps/api";
+import { useInstantLayoutTransition } from 'framer-motion';
 
+
+
+function Map({ lat, lng, latLngArray }) {
+  const center = useMemo(() => ({ lat, lng }), [lat, lng]);
+  const [selected, setSelected] = useState(null);
+
+  const mapRef = useRef(null);
+
+  const onMapLoad = useCallback((map) => {
+    mapRef.current = map;
+  }, []);
+
+  useEffect(() => {
+    if (selected) {
+      mapRef.current.panTo(selected);
+    }
+  }, [selected]);
+  console.log("here")
+  latLngArray?.forEach((latitude, longitude) => (
+  console.log("lat: " + latitude + "long: " + longitude)));
+  console.log("here2")
+  return (
+    <GoogleMap
+      zoom={7}
+      center={center}
+      onLoad={onMapLoad}
+      mapContainerClassName="map-container"
+    >
+      {latLngArray?.map(elt => (
+        <Marker
+          position={{lat: elt.lat, lng: elt.lng}}
+          key={elt.title}
+          label={elt.title}
+          onClick={()=> {setSelected({lat: elt.lat, lng: elt.lng})}}
+        /> 
+      ))}
+      {/* {selected && <Marker position={selected} />} */}
+    </GoogleMap>
+  );
+}
+
+
+
+
+
+
+
+// const PlacesAutocomplete = ({ setSelected }) => {
+    //     const {
+        //         ready,
+        //         value,
+        //         setValue,
+        //         suggestions: {status, data},
+        //         clearSuggestions
+        //     } = usePlacesAutocomplete();
+        //     return <Combobox>
+        //         <ComboboxInput value =  />
+        //     </Combobox>;
+        // }
+        
 export default function CityResults({results}) {
-    
+    const [latLngArray, setLatLngArray] = useState([]);
+
+    useEffect(() => {
+        const array = results ? results.map(location => ({
+            lat: parseFloat(location.latitude),
+            lng: parseFloat(location.longitude),
+            title: location.title
+        })) : [];
+        console.log(array)
+        setLatLngArray(array);
+    }, [results]);
+            
     const colors = {
         "sleep": "purple",
         "eat": "orange",
@@ -12,9 +85,17 @@ export default function CityResults({results}) {
         "drink": "blue"
     }
 
-  return (
-    <Center>
+    const { isLoaded } = useLoadScript({
+        googleMapsApiKey: 'AIzaSyDWfYamWnuZZy7ioCmHxgnH82XxLNUvR3A',
+        libraries: ["places"],
+    });
 
+    if (!isLoaded || results == null) return (<div><center><b>Loading...</b></center></div>) 
+  return (
+    <div>
+        {latLngArray?.length > 0 && <Map lat={40.6446} lng={-73.7858} latLngArray={latLngArray}/>}
+        <br/>
+        <Center>
         <Grid templateColumns='repeat(4, 1fr)' gap={6} maxW={'80%'}>
             {
                 results.map(res => {
@@ -51,6 +132,9 @@ export default function CityResults({results}) {
                 })
             }
         </Grid>
-    </Center>
+
+        </Center>
+    </div>
   )
 }
+

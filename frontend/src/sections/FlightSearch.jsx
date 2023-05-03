@@ -80,9 +80,9 @@ export default function FlightSearch({setResults1, setResults2}) {
                     </>
                 )
             }
-            <IconButton size="sm" rounded={"full"} colorScheme={extraStop ? "red" : "gray"}
+            {/* <IconButton size="sm" rounded={"full"} colorScheme={extraStop ? "red" : "gray"}
             icon={extraStop ? <CloseIcon/> : <AddIcon/>}
-            onClick={() => setExtraStop(!extraStop)}/>
+            onClick={() => setExtraStop(!extraStop)}/> */}
         </HStack>
         <Flex w="full" justify={"center"}>
             <Button colorScheme="teal" onClick={handleSubmit}>Search for flights!</Button>

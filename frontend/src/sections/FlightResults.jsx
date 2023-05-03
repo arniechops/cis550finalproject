@@ -6,7 +6,7 @@ export default function FlightResults({results1, results2}) {
     <Center>
         <HStack spacing={10}>
             <VStack spacing={3} mt={4}>
-                <Text as="b">To</Text>
+                {results1?.length > 0  && <Text as="b">To</Text>}
                 {
                     results1?.map(res => {
                     return <Card p={4} w={"full"} key={res.name}>
@@ -28,7 +28,7 @@ export default function FlightResults({results1, results2}) {
                 }
             </VStack>
             <VStack spacing={3} mt={4}>
-                <Text as="b">Back</Text>
+                {results2?.length > 0  && <Text as="b">Back</Text>}
                 {
                     results2?.map(res => {
                     return <Card p={4} w={"full"} key={res.name}>

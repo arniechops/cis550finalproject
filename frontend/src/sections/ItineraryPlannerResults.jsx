@@ -6,6 +6,14 @@ import SmallAttractionsComponent from '../components/SmallAttractionsComponent';
 
 export default function ItineraryPlannerResults({results}) {
 
+    const colors = {
+        "sleep": "purple",
+        "eat": "orange",
+        "other": "gray",
+        "see": "green",
+        "drink": "blue"
+    }
+
     const [citiesVisited, setCitiesVisited] = useState([]);
     const [hotels, setHotels] = useState({})
     const [attractions, setAttractions] = useState({})
@@ -29,6 +37,8 @@ export default function ItineraryPlannerResults({results}) {
                         temp[x] = data[0] ?? null
                         setHotels(temp)
                     })
+            })
+            arr.forEach(x => {
                 fetch(`/findattractions?airport=${x}`)
                     .then(response => response.json())
                     .then(data => {
@@ -37,7 +47,6 @@ export default function ItineraryPlannerResults({results}) {
                         setAttractions(temp)
                     })
             })
-            console.log(attractions)
         }
     }, [results])
     
@@ -61,7 +70,7 @@ export default function ItineraryPlannerResults({results}) {
                         {
                             citiesVisited.map(x => {
                                 return <GridItem>
-                                <Text>
+                                <Text as="b">
                                     {x}
                                 </Text>
                                 <Box>
@@ -80,13 +89,13 @@ export default function ItineraryPlannerResults({results}) {
                     {
                         citiesVisited.map(x => {
                             return <GridItem>
-                            <Text>
+                            <Text as="b">
                                 {x}
                             </Text>
                             <Box>
                                 {
                                     attractions[x] ? attractions[x].map(elt => {
-                                        return <SmallAttractionsComponent name={elt.article} type={elt.type}/>
+                                        return <SmallAttractionsComponent name={elt.title} type={elt.type}/>
                                     }) : "No attractions found"
                                 }
                             </Box>

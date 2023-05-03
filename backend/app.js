@@ -25,3 +25,4 @@ app.get('/findclosesthotel', routes.findClosestHotel);
 app.get('/findattractions', routes.findAttractions);
 app.get('/airlinesbycountry', routes.airlinesByCountry);
 app.get('/getdistinctcountries', routes.getDistinctCountries);
+app.get('/getdistinctairlines', routes.getDistinctAirlines);

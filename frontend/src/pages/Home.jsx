@@ -35,7 +35,7 @@ export default function Home() {
             <Tab>Flights</Tab>
             <Tab>Hotels</Tab>
             <Tab>Itinerary Planner</Tab>
-            <Tab>Airlines</Tab>
+            <Tab>Airlines and Airports Statistics</Tab>
         </TabList>
 
         <TabPanels>
