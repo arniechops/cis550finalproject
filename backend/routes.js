@@ -173,7 +173,6 @@ var findHotelsWithIncomingFlights = function (req, res) {
     JOIN Airlines X ON X.id = A.airline_id
     WHERE ASrc.city = '${req.query.midCity}' AND ATgt.city = '${req.query.toCity}'
 
-
     UNION ALL
 
     SELECT DISTINCT
@@ -451,6 +450,43 @@ var findHotelsWithIncomingFlights = function (req, res) {
       }
     });
   }
+
+  const airlinesByCountry = function(req, res) {
+    connection.query(`
+    WITH Air_in_Country AS (
+      SELECT id AS aid
+      FROM Airports
+      WHERE country = '${req.query.country}'
+    ), Rts AS(
+        SELECT airline_id, count(*) AS n
+        FROM Routes
+        WHERE EXISTS(SELECT * FROM Air_in_Country WHERE aid = source_id OR aid = target_id)
+        GROUP BY airline_id
+    )
+        SELECT name, n FROM Rts JOIN Airlines ON Rts.airline_id = Airlines.id ORDER BY n DESC;
+    `, (err, data) => {
+      if (err) {
+        console.log(err);
+      } else if (data) {
+        res.json(data);
+      }
+    });
+  }
+
+  var getDistinctCountries = function (req, res) {
+    connection.query(`
+    SELECT DISTINCT country
+    FROM Airports
+    WHERE country LIKE '${req.query.country}%'
+    LIMIT 10;
+  `, (err, data) => {
+    if (err) {
+      console.log(err);
+    } else if (data) {
+      res.json(data);
+    }
+  });
+}
   
 
 var routes = {
@@ -467,7 +503,9 @@ var routes = {
     flightsWithThreeStops,
     findHotelBySearch,
     findClosestHotel,
-    findAttractions
+    findAttractions,
+    airlinesByCountry,
+    getDistinctCountries
 };
 
 module.exports = routes;

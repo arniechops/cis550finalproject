@@ -2,6 +2,7 @@ import { Card, SimpleGrid, Heading, GridItem, Text, Box, Center, VStack } from '
 import React, { useEffect, useState } from 'react'
 import FlightPlanComponent from '../components/FlightPlanComponent'
 import ItineraryPlannerTable from '../components/ItineraryPlannerTable'
+import SmallAttractionsComponent from '../components/SmallAttractionsComponent';
 
 export default function ItineraryPlannerResults({results}) {
 
@@ -47,12 +48,12 @@ export default function ItineraryPlannerResults({results}) {
             <Card p={6} minW={"500px"}>
                 <VStack spacing={4}>
                     <Heading>
-                        Your Itinerary
+                        Your Optimal Itinerary
                     </Heading>
                     <Heading fontSize={'lg'}>
                         Flights
                     </Heading>
-                        {/* <ItineraryPlannerTable data={[results[0]??[]]}/> */}
+                        <ItineraryPlannerTable data={[results[0]??[]]}/>
                     <Heading fontSize={'lg'}>
                         Hotels
                     </Heading>
@@ -84,11 +85,9 @@ export default function ItineraryPlannerResults({results}) {
                             </Text>
                             <Box>
                                 {
-                                    attractions[x].map(elt => {
-                                        return <Text>
-                                            {elt.title + " " + elt.type}
-                                        </Text> 
-                                    })
+                                    attractions[x] ? attractions[x].map(elt => {
+                                        return <SmallAttractionsComponent name={elt.article} type={elt.type}/>
+                                    }) : "No attractions found"
                                 }
                             </Box>
                         </GridItem>
@@ -98,8 +97,11 @@ export default function ItineraryPlannerResults({results}) {
                 </VStack>
             </Card>
         </Center>
+        <Heading size={'lg'} m={2}>
+            All Possible Routes
+        </Heading>
         <ItineraryPlannerTable data={results}/>
-        <FlightPlanComponent/>
+        {/* <FlightPlanComponent/> */}
     </Box>
   )
 }
