@@ -1,0 +1,17 @@
+{
+  "name": "cis550finalproject",
+  "version": "1.0.0",
+  "description": "Final project for CIS550.",
+  "main": "index.js",
+  "scripts": {
+    "frontend": "cd frontend && npm start",
+    "backend": "cd backend && nodemon app.js",
+    "heroku-postbuild": "cd frontend && npm install && npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "cis550finalproject"
+  },
+  "author": "Arnav Chopra",
+  "license": "ISC"
+}
