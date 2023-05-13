@@ -4,7 +4,9 @@ var routes = require('./routes');
 var app = express()
 app.use(express.json())
 
-app.listen(process.env.PORT || 8000, () => {
+const port = process.env.PORT || 8000
+
+app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
 
