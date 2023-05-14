@@ -5,10 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",    
-    "start": "cd backend && node app.js && (cd frontend && npm start)"
-  },
-  "engines": {
-    "node": "14.x"
+    "start": "cd backend && node app.js && (cd .. && cd frontend && npm start)"
   },
   "repository": {
     "type": "git",
