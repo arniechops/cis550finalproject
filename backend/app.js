@@ -10,7 +10,7 @@ app.use(express.static(path.join(__dirname, '../frontend')));
 
 // Serve the React JSX page at the / endpoint
 app.get('/', function(req, res) {
-  res.sendFile(path.join(__dirname, '../frontend/index.jsx'));
+  res.sendFile(path.join(__dirname, '../frontend/src/index.jsx'));
 });
 
 const port = process.env.PORT || 8000
