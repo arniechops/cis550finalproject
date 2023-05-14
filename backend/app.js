@@ -1,8 +1,17 @@
 var express = require('express');
 var routes = require('./routes');
+var path = require('path')
 
 var app = express()
 app.use(express.json())
+
+// Serve static files from the frontend directory
+app.use(express.static(path.join(__dirname, '../frontend')));
+
+// Serve the React JSX page at the / endpoint
+app.get('/', function(req, res) {
+  res.sendFile(path.join(__dirname, '../frontend/index.jsx'));
+});
 
 const port = process.env.PORT || 8000
 
