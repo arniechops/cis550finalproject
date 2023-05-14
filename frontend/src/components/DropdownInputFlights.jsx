@@ -1,7 +1,6 @@
 import { CloseIcon } from '@chakra-ui/icons'
 import { Box, Button, HStack, Input, InputGroup, InputRightElement, VStack } from '@chakra-ui/react'
 import React, { useEffect, useRef, useState } from 'react'
-import useGet from '../hooks/useGet'
 
 export default function DropdownInputFlights({placeholder, width=200, setter}) {
 

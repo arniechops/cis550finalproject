@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",    
+    "heroku-prebuild": "cd frontend && npm install && npm run build && cd .. && cd backend && npm install",
     "start": "cd backend && node app.js && (cd .. && cd frontend && npm start)"
   },
   "repository": {

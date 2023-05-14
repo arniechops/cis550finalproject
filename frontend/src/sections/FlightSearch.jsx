@@ -2,7 +2,6 @@ import React, { useContext, useEffect, useState } from 'react'
 import { AddIcon, ArrowForwardIcon, CloseIcon, PlusSquareIcon } from '@chakra-ui/icons'
 import { Avatar, Box, Button, Card, Checkbox, Flex, HStack, IconButton, Input, Text, VStack } from '@chakra-ui/react'
 import DropdownInputFlights from '../components/DropdownInputFlights';
-import useGet from '../hooks/useGet';
 import { FlightsContext } from '../pages/Home';
 import DropdownInput from '../components/DropdownInput';
 
