@@ -5,13 +5,15 @@ var path = require('path')
 var app = express()
 app.use(express.json())
 
-// Serve static files from the frontend directory
-app.use(express.static(path.join(__dirname, '../frontend')));
+const path = require('path')
 
-// Serve the React JSX page at the / endpoint
-app.get('/', function(req, res) {
-  res.sendFile('cis550finalproject/frontend/index.js');
-});
+// Serve static files from the React frontend app
+app.use(express.static(path.join(__dirname, '../frontend/build')))
+
+// AFTER defining routes: Anything that doesn't match what's above, send back index.html; (the beginning slash ('/') in the string is important!)
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname + '/../frontend/build/index.html'))
+})
 
 const port = process.env.PORT || 8000
 
